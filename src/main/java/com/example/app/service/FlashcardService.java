@@ -19,4 +19,7 @@ public interface FlashcardService {
     List<FlashcardResponse> addCardsToSet(UUID setId, List<CreateFlashcardRequest> cards, String ownerEmail);
     List<FlashcardResponse> getCardsInSet(UUID setId, String ownerEmail);
     void deleteCard(UUID setId, UUID cardId, String ownerEmail);
+
+    // Progress operations
+    com.example.app.dto.response.FlashcardProgressResponse updateFlashcardProgress(UUID cardId, com.example.app.dto.request.UpdateFlashcardProgressRequest request, String ownerEmail);
 }

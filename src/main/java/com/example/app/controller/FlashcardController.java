@@ -83,4 +83,15 @@ public class FlashcardController {
         flashcardService.deleteCard(setId, cardId, auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Card deleted successfully", null));
     }
+
+    // ============ PROGRESS ============
+
+    @PutMapping("/cards/{cardId}/progress")
+    public ResponseEntity<ApiResponse<com.example.app.dto.response.FlashcardProgressResponse>> updateProgress(
+            @PathVariable UUID cardId,
+            @RequestBody com.example.app.dto.request.UpdateFlashcardProgressRequest request,
+            Authentication auth) {
+        com.example.app.dto.response.FlashcardProgressResponse result = flashcardService.updateFlashcardProgress(cardId, request, auth.getName());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Progress updated successfully", result));
+    }
 }

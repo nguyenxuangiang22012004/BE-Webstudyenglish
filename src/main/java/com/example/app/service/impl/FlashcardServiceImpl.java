@@ -7,14 +7,19 @@ import com.example.app.dto.response.FlashcardSetResponse;
 import com.example.app.entity.Flashcard;
 import com.example.app.entity.FlashcardSet;
 import com.example.app.entity.User;
+import com.example.app.entity.UserFlashcardProgress;
 import com.example.app.repository.FlashcardRepository;
 import com.example.app.repository.FlashcardSetRepository;
+import com.example.app.repository.UserFlashcardProgressRepository;
 import com.example.app.repository.UserRepository;
 import com.example.app.service.FlashcardService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZonedDateTime;
+
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,13 +30,16 @@ public class FlashcardServiceImpl implements FlashcardService {
     private final FlashcardSetRepository setRepository;
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
+    private final UserFlashcardProgressRepository progressRepository;
 
     public FlashcardServiceImpl(FlashcardSetRepository setRepository,
                                  FlashcardRepository flashcardRepository,
-                                 UserRepository userRepository) {
+                                 UserRepository userRepository,
+                                 UserFlashcardProgressRepository progressRepository) {
         this.setRepository = setRepository;
         this.flashcardRepository = flashcardRepository;
         this.userRepository = userRepository;
+        this.progressRepository = progressRepository;
     }
 
     private User getUser(String email) {
@@ -48,7 +56,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         return set;
     }
 
-    private FlashcardResponse toFlashcardResponse(Flashcard card) {
+    private FlashcardResponse toFlashcardResponse(Flashcard card, Map<UUID, String> statusMap) {
         FlashcardResponse res = new FlashcardResponse();
         res.setId(card.getId());
         res.setWord(card.getWord());
@@ -56,10 +64,11 @@ public class FlashcardServiceImpl implements FlashcardService {
         res.setPronunciation(card.getPronunciation());
         res.setExample(card.getExample());
         res.setCreatedAt(card.getCreatedAt());
+        res.setStatus(statusMap.getOrDefault(card.getId(), "UNKNOWN"));
         return res;
     }
 
-    private FlashcardSetResponse toSetResponse(FlashcardSet set, List<Flashcard> cards) {
+    private FlashcardSetResponse toSetResponse(FlashcardSet set, List<Flashcard> cards, User user) {
         FlashcardSetResponse res = new FlashcardSetResponse();
         res.setId(set.getId());
         res.setName(set.getName());
@@ -69,7 +78,11 @@ public class FlashcardServiceImpl implements FlashcardService {
         res.setCreatedAt(set.getCreatedAt());
         res.setUpdatedAt(set.getUpdatedAt());
         res.setTotalCards(cards.size());
-        res.setCards(cards.stream().map(this::toFlashcardResponse).collect(Collectors.toList()));
+
+        Map<UUID, String> statusMap = progressRepository.findByUser(user).stream()
+                .collect(Collectors.toMap(p -> p.getFlashcard().getId(), p -> p.getStatus().name(), (a, b) -> a));
+
+        res.setCards(cards.stream().map(c -> toFlashcardResponse(c, statusMap)).collect(Collectors.toList()));
         return res;
     }
 
@@ -83,7 +96,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         set.setOwner(owner);
         set.setIsPublic(request.getIsPublic() != null ? request.getIsPublic() : false);
         FlashcardSet saved = setRepository.save(set);
-        return toSetResponse(saved, List.of());
+        return toSetResponse(saved, List.of(), owner);
     }
 
     @Override
@@ -93,7 +106,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         return setRepository.findByOwner(owner).stream()
                 .map(set -> {
                     List<Flashcard> cards = flashcardRepository.findBySet(set);
-                    return toSetResponse(set, cards);
+                    return toSetResponse(set, cards, owner);
                 })
                 .collect(Collectors.toList());
     }
@@ -101,9 +114,10 @@ public class FlashcardServiceImpl implements FlashcardService {
     @Override
     @Transactional(readOnly = true)
     public FlashcardSetResponse getSetById(UUID setId, String ownerEmail) {
+        User user = getUser(ownerEmail);
         FlashcardSet set = getSetAndVerifyOwner(setId, ownerEmail);
         List<Flashcard> cards = flashcardRepository.findBySet(set);
-        return toSetResponse(set, cards);
+        return toSetResponse(set, cards, user);
     }
 
     @Override
@@ -126,15 +140,22 @@ public class FlashcardServiceImpl implements FlashcardService {
         }).collect(Collectors.toList());
 
         List<Flashcard> saved = flashcardRepository.saveAll(cards);
-        return saved.stream().map(this::toFlashcardResponse).collect(Collectors.toList());
+        User user = getUser(ownerEmail);
+        Map<UUID, String> statusMap = progressRepository.findByUser(user).stream()
+                .collect(Collectors.toMap(p -> p.getFlashcard().getId(), p -> p.getStatus().name(), (a, b) -> a));
+        return saved.stream().map(c -> toFlashcardResponse(c, statusMap)).collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<FlashcardResponse> getCardsInSet(UUID setId, String ownerEmail) {
+        User user = getUser(ownerEmail);
         FlashcardSet set = getSetAndVerifyOwner(setId, ownerEmail);
-        return flashcardRepository.findBySet(set).stream()
-                .map(this::toFlashcardResponse)
+        List<Flashcard> cards = flashcardRepository.findBySet(set);
+        Map<UUID, String> statusMap = progressRepository.findByUser(user).stream()
+                .collect(Collectors.toMap(p -> p.getFlashcard().getId(), p -> p.getStatus().name(), (a, b) -> a));
+        return cards.stream()
+                .map(c -> toFlashcardResponse(c, statusMap))
                 .collect(Collectors.toList());
     }
 
@@ -147,5 +168,37 @@ public class FlashcardServiceImpl implements FlashcardService {
             throw new IllegalArgumentException("Card does not belong to this set");
         }
         flashcardRepository.delete(card);
+    }
+
+    @Override
+    public com.example.app.dto.response.FlashcardProgressResponse updateFlashcardProgress(UUID cardId, com.example.app.dto.request.UpdateFlashcardProgressRequest request, String ownerEmail) {
+        User user = getUser(ownerEmail);
+        Flashcard card = flashcardRepository.findById(cardId)
+                .orElseThrow(() -> new IllegalArgumentException("Flashcard not found"));
+
+        com.example.app.entity.UserFlashcardProgress progress = progressRepository.findByUserAndFlashcard(user, card)
+                .orElse(new com.example.app.entity.UserFlashcardProgress(user, card));
+
+        if (request.getStatus() != null) {
+            progress.setStatus(request.getStatus());
+        }
+        
+        progress.setLastReviewedAt(ZonedDateTime.now());
+        
+        // Simple spaced repetition logic for nextReviewDate could be added here
+        if (progress.getStatus() == com.example.app.entity.UserFlashcardProgress.FlashcardStatus.MASTERED) {
+            progress.setNextReviewDate(ZonedDateTime.now().plusDays(7));
+        } else if (progress.getStatus() == com.example.app.entity.UserFlashcardProgress.FlashcardStatus.LEARNING) {
+            progress.setNextReviewDate(ZonedDateTime.now().plusDays(1));
+        }
+
+        com.example.app.entity.UserFlashcardProgress saved = progressRepository.save(progress);
+
+        return new com.example.app.dto.response.FlashcardProgressResponse(
+                saved.getFlashcard().getId(),
+                saved.getStatus(),
+                saved.getLastReviewedAt(),
+                saved.getNextReviewDate()
+        );
     }
 }

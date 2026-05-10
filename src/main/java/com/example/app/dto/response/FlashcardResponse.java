@@ -10,18 +10,23 @@ public class FlashcardResponse {
     private String pronunciation;
     private String example;
     private ZonedDateTime createdAt;
+    private String status;
 
     public FlashcardResponse() {}
 
     public FlashcardResponse(UUID id, String word, String meaning, String pronunciation,
-                             String example, ZonedDateTime createdAt) {
+                             String example, ZonedDateTime createdAt, String status) {
         this.id = id;
         this.word = word;
         this.meaning = meaning;
         this.pronunciation = pronunciation;
         this.example = example;
         this.createdAt = createdAt;
+        this.status = status;
     }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

@@ -1,6 +1,7 @@
 package com.example.app.config;
 
 import com.example.app.security.CustomUserDetailsService;
+import com.example.app.security.RateLimitingFilter;
 import com.example.app.security.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,10 +32,14 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService, 
+                         JwtAuthenticationFilter jwtAuthenticationFilter,
+                         RateLimitingFilter rateLimitingFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -72,6 +77,7 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(rateLimitingFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

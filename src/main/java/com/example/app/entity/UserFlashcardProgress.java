@@ -27,11 +27,10 @@ public class UserFlashcardProgress {
     private Flashcard flashcard;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, columnDefinition = "flashcard_status")
     private FlashcardStatus status = FlashcardStatus.UNKNOWN;
 
-    @Column(nullable = false)
-    private Boolean isFavorite = false;
 
     @Column(name = "next_review_date")
     private ZonedDateTime nextReviewDate;
@@ -82,14 +81,6 @@ public class UserFlashcardProgress {
 
     public void setStatus(FlashcardStatus status) {
         this.status = status;
-    }
-
-    public Boolean getIsFavorite() {
-        return isFavorite;
-    }
-
-    public void setIsFavorite(Boolean isFavorite) {
-        this.isFavorite = isFavorite;
     }
 
     public ZonedDateTime getNextReviewDate() {
