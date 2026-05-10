@@ -18,7 +18,7 @@ public class JwtUtil {
     @Value("${app.jwt.secret:defaultSecretKeyForDevelopmentShouldBeVeryLongAndSecure123!@#}")
     private String jwtSecret;
 
-    @Value("${app.jwt.access-token-expiration-ms:900000}") // 15 minutes
+    @Value("${app.jwt.access-token-expiration-ms:86400000}") // 24 hours
     private long jwtAccessTokenExpirationMs;
 
     @Value("${app.jwt.refresh-token-expiration-ms:604800000}") // 7 days

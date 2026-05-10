@@ -30,6 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
+        System.out.println("Processing request: " + request.getRequestURI());
+        System.out.println("Auth Header: " + (authorizationHeader != null ? "Present" : "Missing"));
 
         String username = null;
         String jwt = null;
@@ -38,7 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt);
+                System.out.println("Extracted username: " + username);
             } catch (Exception e) {
+                System.out.println("Could not parse token: " + e.getMessage());
                 logger.error("Could not parse token", e);
             }
         }

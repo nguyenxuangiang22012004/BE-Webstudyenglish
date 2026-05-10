@@ -16,8 +16,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
-        ApiResponse<Object> response = new ApiResponse<>(false, "Something went wrong: " + ex.getMessage(), null);
+        System.err.println("Unexpected error: " + ex.getMessage());
+        ex.printStackTrace();
+        ApiResponse<Object> response = new ApiResponse<>(false, "Internal Server Error: " + ex.getMessage(), null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
+        System.err.println("Access Denied error: " + ex.getMessage());
+        ApiResponse<Object> response = new ApiResponse<>(false, "Access Denied: " + ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

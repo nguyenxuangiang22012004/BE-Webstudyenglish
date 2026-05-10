@@ -63,8 +63,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/v1/auth/**").permitAll()
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers("/v1/flashcards/**").authenticated()
                     .anyRequest().authenticated()
-            );
+            )
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(
+                (request, response, authException) -> response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+            ));
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
