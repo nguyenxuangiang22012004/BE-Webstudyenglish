@@ -29,7 +29,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "userrole")
     private UserRole role = UserRole.USER;
 
     @Column(length = 500)

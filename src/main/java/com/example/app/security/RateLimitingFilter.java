@@ -15,15 +15,21 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+@org.springframework.stereotype.Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-    @Autowired
+    @org.springframework.beans.factory.annotation.Autowired
     private RateLimitingService rateLimitingService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        // Skip rate limiting for OPTIONS requests (CORS preflight)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String key;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
