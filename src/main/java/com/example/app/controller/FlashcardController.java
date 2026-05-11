@@ -43,8 +43,9 @@ public class FlashcardController {
     @GetMapping("/sets/{setId}")
     public ResponseEntity<ApiResponse<FlashcardSetResponse>> getSetById(
             @PathVariable UUID setId,
+            @RequestParam(required = false) String status,
             Authentication auth) {
-        FlashcardSetResponse set = flashcardService.getSetById(setId, auth.getName());
+        FlashcardSetResponse set = flashcardService.getSetById(setId, auth.getName(), status);
         return ResponseEntity.ok(new ApiResponse<>(true, "Set retrieved successfully", set));
     }
 

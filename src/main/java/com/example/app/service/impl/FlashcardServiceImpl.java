@@ -113,11 +113,22 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     @Transactional(readOnly = true)
-    public FlashcardSetResponse getSetById(UUID setId, String ownerEmail) {
+    public FlashcardSetResponse getSetById(UUID setId, String ownerEmail, String status) {
         User user = getUser(ownerEmail);
         FlashcardSet set = getSetAndVerifyOwner(setId, ownerEmail);
         List<Flashcard> cards = flashcardRepository.findBySet(set);
-        return toSetResponse(set, cards, user);
+        
+        FlashcardSetResponse res = toSetResponse(set, cards, user);
+
+        if (status != null && !status.equalsIgnoreCase("all")) {
+            List<FlashcardResponse> filteredCards = res.getCards().stream()
+                    .filter(c -> c.getStatus().equalsIgnoreCase(status))
+                    .collect(Collectors.toList());
+            res.setCards(filteredCards);
+            // Optionally, we keep totalCards as the total number in the set, not the filtered number
+        }
+
+        return res;
     }
 
     @Override
