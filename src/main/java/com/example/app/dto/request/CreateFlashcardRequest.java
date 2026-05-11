@@ -18,6 +18,9 @@ public class CreateFlashcardRequest {
 
     private String example;
 
+    @Size(max = 50)
+    private String partOfSpeech;
+
 
     public String getWord() { return word; }
     public void setWord(String word) { this.word = word; }
@@ -30,5 +33,8 @@ public class CreateFlashcardRequest {
 
     public String getExample() { return example; }
     public void setExample(String example) { this.example = example; }
+
+    public String getPartOfSpeech() { return partOfSpeech; }
+    public void setPartOfSpeech(String partOfSpeech) { this.partOfSpeech = partOfSpeech; }
 
 }

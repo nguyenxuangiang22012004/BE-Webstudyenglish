@@ -28,8 +28,7 @@ public class User {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false, columnDefinition = "userrole")
+    @Column(nullable = false, length = 50)
     private UserRole role = UserRole.USER;
 
     @Column(length = 500)

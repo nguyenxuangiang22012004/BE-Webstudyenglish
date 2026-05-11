@@ -11,11 +11,12 @@ public class FlashcardResponse {
     private String example;
     private ZonedDateTime createdAt;
     private String status;
+    private String partOfSpeech;
 
     public FlashcardResponse() {}
 
     public FlashcardResponse(UUID id, String word, String meaning, String pronunciation,
-                             String example, ZonedDateTime createdAt, String status) {
+                             String example, ZonedDateTime createdAt, String status, String partOfSpeech) {
         this.id = id;
         this.word = word;
         this.meaning = meaning;
@@ -23,6 +24,7 @@ public class FlashcardResponse {
         this.example = example;
         this.createdAt = createdAt;
         this.status = status;
+        this.partOfSpeech = partOfSpeech;
     }
 
     public String getStatus() { return status; }
@@ -46,4 +48,7 @@ public class FlashcardResponse {
 
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getPartOfSpeech() { return partOfSpeech; }
+    public void setPartOfSpeech(String partOfSpeech) { this.partOfSpeech = partOfSpeech; }
 }

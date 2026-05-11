@@ -99,6 +99,12 @@
             <artifactId>bucket4j-core</artifactId>
             <version>8.1.0</version>
         </dependency>
+
+        <!-- Flyway Migration -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

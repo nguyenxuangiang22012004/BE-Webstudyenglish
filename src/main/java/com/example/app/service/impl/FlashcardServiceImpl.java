@@ -63,6 +63,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         res.setMeaning(card.getMeaning());
         res.setPronunciation(card.getPronunciation());
         res.setExample(card.getExample());
+        res.setPartOfSpeech(card.getPartOfSpeech());
         res.setCreatedAt(card.getCreatedAt());
         res.setStatus(statusMap.getOrDefault(card.getId(), "UNKNOWN"));
         return res;
@@ -147,6 +148,7 @@ public class FlashcardServiceImpl implements FlashcardService {
             card.setMeaning(req.getMeaning());
             card.setPronunciation(req.getPronunciation());
             card.setExample(req.getExample());
+            card.setPartOfSpeech(req.getPartOfSpeech());
             return card;
         }).collect(Collectors.toList());
 

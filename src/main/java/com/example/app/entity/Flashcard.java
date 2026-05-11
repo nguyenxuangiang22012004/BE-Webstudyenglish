@@ -28,6 +28,9 @@ public class Flashcard {
     @Column(length = 255)
     private String pronunciation;
 
+    @Column(length = 50)
+    private String partOfSpeech;
+
     @Column(columnDefinition = "TEXT")
     private String example;
 
@@ -86,6 +89,14 @@ public class Flashcard {
 
     public void setPronunciation(String pronunciation) {
         this.pronunciation = pronunciation;
+    }
+
+    public String getPartOfSpeech() {
+        return partOfSpeech;
+    }
+
+    public void setPartOfSpeech(String partOfSpeech) {
+        this.partOfSpeech = partOfSpeech;
     }
 
     public String getExample() {
