@@ -14,11 +14,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+        String supportedMethods = ex.getSupportedMethods() != null ? String.join(", ", ex.getSupportedMethods()) : "None";
+        ApiResponse<Object> response = new ApiResponse<>(false, "Method Not Supported: " + ex.getMethod() + ". Supported: " + supportedMethods, null);
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
-        System.err.println("Unexpected error: " + ex.getMessage());
-        ex.printStackTrace();
-        ApiResponse<Object> response = new ApiResponse<>(false, "Internal Server Error: " + ex.getMessage(), null);
+        ex.printStackTrace(); // Log the full stack trace to console
+        ApiResponse<Object> response = new ApiResponse<>(false, "Internal Server Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 

@@ -81,6 +81,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         res.setTotalCards(cards.size());
 
         Map<UUID, String> statusMap = progressRepository.findByUser(user).stream()
+                .filter(p -> p.getFlashcard() != null)
                 .collect(Collectors.toMap(p -> p.getFlashcard().getId(), p -> p.getStatus().name(), (a, b) -> a));
 
         res.setCards(cards.stream().map(c -> toFlashcardResponse(c, statusMap)).collect(Collectors.toList()));
@@ -130,6 +131,28 @@ public class FlashcardServiceImpl implements FlashcardService {
         }
 
         return res;
+    }
+
+    @Override
+    public FlashcardSetResponse updateSet(UUID setId, CreateSetRequest request, String ownerEmail) {
+        User user = getUser(ownerEmail);
+        FlashcardSet set = setRepository.findById(setId)
+                .orElseThrow(() -> new IllegalArgumentException("Flashcard set not found"));
+
+        if (!set.getOwner().getEmail().equals(ownerEmail)) {
+            throw new org.springframework.security.access.AccessDeniedException("You do not have permission to modify this set");
+        }
+        
+        if (request.getName() != null) set.setName(request.getName());
+        if (request.getDescription() != null) set.setDescription(request.getDescription());
+        if (request.getEmoji() != null) set.setEmoji(request.getEmoji());
+        if (request.getIsPublic() != null) {
+            set.setIsPublic(request.getIsPublic());
+        }
+        
+        FlashcardSet saved = setRepository.saveAndFlush(set);
+        List<Flashcard> cards = flashcardRepository.findBySet(saved);
+        return toSetResponse(saved, cards, user);
     }
 
     @Override

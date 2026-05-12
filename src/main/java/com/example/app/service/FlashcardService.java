@@ -13,6 +13,7 @@ public interface FlashcardService {
     FlashcardSetResponse createSet(CreateSetRequest request, String ownerEmail);
     List<FlashcardSetResponse> getMySets(String ownerEmail);
     FlashcardSetResponse getSetById(UUID setId, String ownerEmail, String status);
+    FlashcardSetResponse updateSet(UUID setId, CreateSetRequest request, String ownerEmail);
     void deleteSet(UUID setId, String ownerEmail);
 
     // Card operations

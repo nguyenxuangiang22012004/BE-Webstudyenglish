@@ -49,6 +49,15 @@ public class FlashcardController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Set retrieved successfully", set));
     }
 
+    @PutMapping("/sets/{setId}")
+    public ResponseEntity<ApiResponse<FlashcardSetResponse>> updateSet(
+            @PathVariable UUID setId,
+            @Valid @RequestBody CreateSetRequest request,
+            Authentication auth) {
+        FlashcardSetResponse result = flashcardService.updateSet(setId, request, auth.getName());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Set updated successfully", result));
+    }
+
     @DeleteMapping("/sets/{setId}")
     public ResponseEntity<ApiResponse<Object>> deleteSet(
             @PathVariable UUID setId,
