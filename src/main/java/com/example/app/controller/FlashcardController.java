@@ -5,12 +5,18 @@ import com.example.app.dto.request.CreateSetRequest;
 import com.example.app.dto.response.ApiResponse;
 import com.example.app.dto.response.FlashcardResponse;
 import com.example.app.dto.response.FlashcardSetResponse;
+import com.example.app.service.ExcelExportService;
 import com.example.app.service.FlashcardService;
 import jakarta.validation.Valid;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,9 +25,13 @@ import java.util.UUID;
 public class FlashcardController {
 
     private final FlashcardService flashcardService;
+    private final ExcelExportService excelExportService;
 
-    public FlashcardController(FlashcardService flashcardService) {
+    public FlashcardController(
+            FlashcardService flashcardService,
+            ExcelExportService excelExportService) {
         this.flashcardService = flashcardService;
+        this.excelExportService = excelExportService;
     }
 
     // ============ FLASHCARD SETS ============
@@ -64,6 +74,28 @@ public class FlashcardController {
             Authentication auth) {
         flashcardService.deleteSet(setId, auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Set deleted successfully", null));
+    }
+
+    @GetMapping("/sets/{setId}/export")
+    public ResponseEntity<byte[]> exportSetToExcel(
+            @PathVariable UUID setId,
+            Authentication auth) throws IOException {
+        byte[] excelBytes = excelExportService.exportFlashcardSetToExcel(setId, auth.getName());
+
+        String filename = "flashcards_" + setId + ".xlsx";
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(filename, StandardCharsets.UTF_8)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.setContentLength(excelBytes.length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(excelBytes);
     }
 
     // ============ FLASHCARDS IN A SET ============
