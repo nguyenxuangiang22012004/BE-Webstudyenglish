@@ -13,7 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/ai-listening")
+@RequestMapping("/v1/ai-listening")
 public class AiListeningHistoryController {
 
     private final AiListeningHistoryService aiListeningHistoryService;
@@ -27,7 +27,7 @@ public class AiListeningHistoryController {
             @AuthenticationPrincipal User user,
             @RequestBody SaveAiListeningHistoryRequest request) {
         AiListeningHistoryResponse response = aiListeningHistoryService.saveHistory(user, request);
-        return ResponseEntity.ok(ApiResponse.success(response, "Lưu lịch sử bài nghe thành công"));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lưu lịch sử bài nghe thành công", response));
     }
 
     @GetMapping("/history")
@@ -37,6 +37,6 @@ public class AiListeningHistoryController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<AiListeningHistoryResponse> response = aiListeningHistoryService.getHistory(user, pageable);
-        return ResponseEntity.ok(ApiResponse.success(response, "Lấy danh sách lịch sử thành công"));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách lịch sử thành công", response));
     }
 }
