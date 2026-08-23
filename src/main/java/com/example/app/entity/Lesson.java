@@ -2,54 +2,71 @@ package com.example.app.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "lessons")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Topic topic;
+
     @Column(nullable = false, length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(length = 100)
-    private String category;
-
-    @Enumerated(EnumType.STRING)
-    private LessonLevel level;
+    @Column(nullable = false, length = 50)
+    private String type; // VOCABULARY, FILL_BLANK, SITUATION, SHADOWING, CONVERSATION
 
     @Column(nullable = false)
-    private Integer duration; // in minutes
+    private Integer orderIndex = 0;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private String contentJson;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private ZonedDateTime createdAt;
 
-    public Lesson() {
-    }
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private ZonedDateTime updatedAt;
 
-    public Lesson(String title) {
-        this.title = title;
-    }
+    // Getters and Setters
 
-    // Getters & Setters
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public Topic getTopic() {
+        return topic;
+    }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("topicId")
+    @jakarta.persistence.Transient
+    public UUID getTopicIdValue() {
+        return topic != null ? topic.getId() : null;
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
     public String getTitle() {
@@ -60,44 +77,28 @@ public class Lesson {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getType() {
+        return type;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getCategory() {
-        return category;
+    public Integer getOrderIndex() {
+        return orderIndex;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 
-    public LessonLevel getLevel() {
-        return level;
+    public String getContentJson() {
+        return contentJson;
     }
 
-    public void setLevel(LessonLevel level) {
-        this.level = level;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+    public void setContentJson(String contentJson) {
+        this.contentJson = contentJson;
     }
 
     public ZonedDateTime getCreatedAt() {
@@ -108,7 +109,11 @@ public class Lesson {
         this.createdAt = createdAt;
     }
 
-    public enum LessonLevel {
-        BEGINNER, INTERMEDIATE, ADVANCED
+    public ZonedDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(ZonedDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, UUID> {
-    List<Lesson> findByCategory(String category);
-    List<Lesson> findByLevel(Lesson.LessonLevel level);
+    List<Lesson> findByTopicIdOrderByOrderIndexAsc(UUID topicId);
 }
