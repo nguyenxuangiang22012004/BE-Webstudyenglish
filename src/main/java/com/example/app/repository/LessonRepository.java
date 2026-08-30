@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, UUID> {
     List<Lesson> findByTopicIdOrderByOrderIndexAsc(UUID topicId);
+    long countByTopicId(UUID topicId);
 }
+

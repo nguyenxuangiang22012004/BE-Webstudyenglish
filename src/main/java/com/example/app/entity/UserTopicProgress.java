@@ -35,6 +35,12 @@ public class UserTopicProgress {
     @Column
     private Integer score = 0;
 
+    @Column(nullable = false)
+    private Integer currentStep = 0;
+
+    @Column(name = "is_passed", nullable = false)
+    private Boolean isPassed = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private ZonedDateTime createdAt;
@@ -91,6 +97,22 @@ public class UserTopicProgress {
 
     public void setScore(Integer score) {
         this.score = score;
+    }
+
+    public Integer getCurrentStep() {
+        return currentStep;
+    }
+
+    public void setCurrentStep(Integer currentStep) {
+        this.currentStep = currentStep;
+    }
+
+    public Boolean getPassed() {
+        return isPassed;
+    }
+
+    public void setPassed(Boolean passed) {
+        isPassed = passed;
     }
 
     public ZonedDateTime getCreatedAt() {
