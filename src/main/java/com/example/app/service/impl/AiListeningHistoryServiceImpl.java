@@ -15,21 +15,48 @@ import org.springframework.transaction.annotation.Transactional;
 public class AiListeningHistoryServiceImpl implements AiListeningHistoryService {
 
     private final AiListeningHistoryRepository aiListeningHistoryRepository;
+    private final com.example.app.repository.UserRepository userRepository;
 
-    public AiListeningHistoryServiceImpl(AiListeningHistoryRepository aiListeningHistoryRepository) {
+    public AiListeningHistoryServiceImpl(AiListeningHistoryRepository aiListeningHistoryRepository,
+                                         com.example.app.repository.UserRepository userRepository) {
         this.aiListeningHistoryRepository = aiListeningHistoryRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
-    public AiListeningHistoryResponse saveHistory(User user, SaveAiListeningHistoryRequest request) {
+    public AiListeningHistoryResponse saveHistory(User currentUser, SaveAiListeningHistoryRequest request) {
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         AiListeningHistory history = new AiListeningHistory();
         history.setUser(user);
         history.setTopic(request.getTopic());
         history.setLevel(request.getLevel());
-        history.setLessonData(request.getLessonData());
-        history.setUserAnswersData(request.getUserAnswersData());
-        history.setScore(request.getScore());
+        history.setLessonData(request.getLessonData() != null ? request.getLessonData() : com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode());
+        history.setUserAnswersData(request.getUserAnswersData() != null ? request.getUserAnswersData() : com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode());
+        history.setScore(request.getScore() != null ? request.getScore() : 0);
+
+        history = aiListeningHistoryRepository.save(history);
+        return mapToResponse(history);
+    }
+
+    @Override
+    @Transactional
+    public AiListeningHistoryResponse updateHistory(User currentUser, java.util.UUID id, com.example.app.dto.request.UpdateAiListeningHistoryRequest request) {
+        AiListeningHistory history = aiListeningHistoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch sử bài nghe"));
+        
+        if (!history.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("Bạn không có quyền cập nhật lịch sử này");
+        }
+
+        if (request.getUserAnswersData() != null) {
+            history.setUserAnswersData(request.getUserAnswersData());
+        }
+        if (request.getScore() != null) {
+            history.setScore(request.getScore());
+        }
 
         history = aiListeningHistoryRepository.save(history);
         return mapToResponse(history);

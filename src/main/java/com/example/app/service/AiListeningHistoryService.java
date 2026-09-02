@@ -8,5 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface AiListeningHistoryService {
     AiListeningHistoryResponse saveHistory(User user, SaveAiListeningHistoryRequest request);
+    AiListeningHistoryResponse updateHistory(User user, java.util.UUID id, com.example.app.dto.request.UpdateAiListeningHistoryRequest request);
     Page<AiListeningHistoryResponse> getHistory(User user, Pageable pageable);
 }

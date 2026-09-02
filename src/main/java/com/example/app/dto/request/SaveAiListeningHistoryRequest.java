@@ -3,8 +3,8 @@ package com.example.app.dto.request;
 public class SaveAiListeningHistoryRequest {
     private String topic;
     private String level;
-    private Object lessonData;
-    private Object userAnswersData;
+    private com.fasterxml.jackson.databind.JsonNode lessonData;
+    private com.fasterxml.jackson.databind.JsonNode userAnswersData;
     private Integer score;
 
     public SaveAiListeningHistoryRequest() {
@@ -26,19 +26,19 @@ public class SaveAiListeningHistoryRequest {
         this.level = level;
     }
 
-    public Object getLessonData() {
+    public com.fasterxml.jackson.databind.JsonNode getLessonData() {
         return lessonData;
     }
 
-    public void setLessonData(Object lessonData) {
+    public void setLessonData(com.fasterxml.jackson.databind.JsonNode lessonData) {
         this.lessonData = lessonData;
     }
 
-    public Object getUserAnswersData() {
+    public com.fasterxml.jackson.databind.JsonNode getUserAnswersData() {
         return userAnswersData;
     }
 
-    public void setUserAnswersData(Object userAnswersData) {
+    public void setUserAnswersData(com.fasterxml.jackson.databind.JsonNode userAnswersData) {
         this.userAnswersData = userAnswersData;
     }
 

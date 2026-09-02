@@ -28,11 +28,11 @@ public class AiListeningHistory {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "lesson_data", columnDefinition = "jsonb", nullable = false)
-    private Object lessonData;
+    private com.fasterxml.jackson.databind.JsonNode lessonData;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "user_answers_data", columnDefinition = "jsonb", nullable = false)
-    private Object userAnswersData;
+    private com.fasterxml.jackson.databind.JsonNode userAnswersData;
 
     @Column(nullable = false)
     private Integer score;
@@ -44,7 +44,7 @@ public class AiListeningHistory {
     public AiListeningHistory() {
     }
 
-    public AiListeningHistory(User user, String topic, String level, Object lessonData, Object userAnswersData, Integer score) {
+    public AiListeningHistory(User user, String topic, String level, com.fasterxml.jackson.databind.JsonNode lessonData, com.fasterxml.jackson.databind.JsonNode userAnswersData, Integer score) {
         this.user = user;
         this.topic = topic;
         this.level = level;
@@ -86,19 +86,19 @@ public class AiListeningHistory {
         this.level = level;
     }
 
-    public Object getLessonData() {
+    public com.fasterxml.jackson.databind.JsonNode getLessonData() {
         return lessonData;
     }
 
-    public void setLessonData(Object lessonData) {
+    public void setLessonData(com.fasterxml.jackson.databind.JsonNode lessonData) {
         this.lessonData = lessonData;
     }
 
-    public Object getUserAnswersData() {
+    public com.fasterxml.jackson.databind.JsonNode getUserAnswersData() {
         return userAnswersData;
     }
 
-    public void setUserAnswersData(Object userAnswersData) {
+    public void setUserAnswersData(com.fasterxml.jackson.databind.JsonNode userAnswersData) {
         this.userAnswersData = userAnswersData;
     }
 

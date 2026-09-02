@@ -24,7 +24,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
         ex.printStackTrace(); // Log the full stack trace to console
-        ApiResponse<Object> response = new ApiResponse<>(false, "Internal Server Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), null);
+        
+        Throwable rootCause = ex;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        
+        ApiResponse<Object> response = new ApiResponse<>(false, "Internal Server Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage() + ". Root cause: " + rootCause.getClass().getSimpleName() + " - " + rootCause.getMessage(), null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
