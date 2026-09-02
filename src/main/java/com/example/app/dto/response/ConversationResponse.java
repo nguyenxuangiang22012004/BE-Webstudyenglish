@@ -9,6 +9,7 @@ public class ConversationResponse {
     private String topic;
     private String modelId;
     private String vocabularyJson;
+    private String level;
     private ZonedDateTime createdAt;
     private List<MessageResponse> messages;
 
@@ -23,6 +24,9 @@ public class ConversationResponse {
 
     public String getVocabularyJson() { return vocabularyJson; }
     public void setVocabularyJson(String vocabularyJson) { this.vocabularyJson = vocabularyJson; }
+
+    public String getLevel() { return level; }
+    public void setLevel(String level) { this.level = level; }
 
     public ZonedDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }

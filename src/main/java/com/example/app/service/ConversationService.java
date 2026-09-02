@@ -62,6 +62,7 @@ public class ConversationService {
         conversation.setUser(user);
         conversation.setTopic(request.getTopic());
         conversation.setModelId(request.getModelId() != null ? request.getModelId() : "gemini-1.5-pro");
+        conversation.setLevel(request.getLevel() != null ? request.getLevel() : "B1");
         conversation.setVocabularyJson(request.getVocabularyJson());
         
         conversation = conversationRepository.save(conversation);
@@ -91,9 +92,47 @@ public class ConversationService {
         response.setId(conversation.getId());
         response.setTopic(conversation.getTopic());
         response.setModelId(conversation.getModelId());
+        response.setLevel(conversation.getLevel());
         response.setVocabularyJson(conversation.getVocabularyJson());
         response.setCreatedAt(conversation.getCreatedAt());
         return response;
+    }
+
+    @Transactional
+    public ConversationResponse updateVocabulary(UUID conversationId, UUID userId, String vocabularyJson) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+                
+        if (!conversation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Access denied");
+        }
+
+        conversation.setVocabularyJson(vocabularyJson);
+        conversation = conversationRepository.save(conversation);
+        return mapToResponseWithoutMessages(conversation);
+    }
+
+    @Transactional
+    public MessageResponse updateMessageFeedback(UUID conversationId, UUID messageId, UUID userId, String feedback, String suggestedAnswer) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+                
+        if (!conversation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Access denied");
+        }
+
+        ConversationMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("Message not found"));
+
+        if (!message.getConversation().getId().equals(conversationId)) {
+            throw new RuntimeException("Message does not belong to conversation");
+        }
+
+        message.setFeedback(feedback);
+        message.setSuggestedAnswer(suggestedAnswer);
+        message = messageRepository.save(message);
+        
+        return mapToMessageResponse(message);
     }
 
     private MessageResponse mapToMessageResponse(ConversationMessage message) {
@@ -101,6 +140,8 @@ public class ConversationService {
         response.setId(message.getId());
         response.setRole(message.getRole());
         response.setText(message.getText());
+        response.setFeedback(message.getFeedback());
+        response.setSuggestedAnswer(message.getSuggestedAnswer());
         response.setCreatedAt(message.getCreatedAt());
         return response;
     }

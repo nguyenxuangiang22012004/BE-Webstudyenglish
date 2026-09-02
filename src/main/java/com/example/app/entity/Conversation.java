@@ -30,6 +30,9 @@ public class Conversation {
     @Column(name = "vocabulary_json", columnDefinition = "TEXT")
     private String vocabularyJson;
 
+    @Column(length = 10)
+    private String level;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private ZonedDateTime createdAt;
@@ -81,6 +84,14 @@ public class Conversation {
 
     public void setVocabularyJson(String vocabularyJson) {
         this.vocabularyJson = vocabularyJson;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public ZonedDateTime getCreatedAt() {

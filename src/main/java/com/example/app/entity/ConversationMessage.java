@@ -24,6 +24,12 @@ public class ConversationMessage {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
+    @Column(columnDefinition = "TEXT")
+    private String suggestedAnswer;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private ZonedDateTime createdAt;
@@ -60,6 +66,22 @@ public class ConversationMessage {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public String getSuggestedAnswer() {
+        return suggestedAnswer;
+    }
+
+    public void setSuggestedAnswer(String suggestedAnswer) {
+        this.suggestedAnswer = suggestedAnswer;
     }
 
     public ZonedDateTime getCreatedAt() {

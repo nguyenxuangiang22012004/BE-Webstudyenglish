@@ -1,7 +1,10 @@
 package com.example.app.controller;
 
+import java.util.UUID;
+
 import com.example.app.dto.request.AddMessageRequest;
 import com.example.app.dto.request.CreateConversationRequest;
+import com.example.app.dto.request.UpdateVocabularyRequest;
 import com.example.app.dto.response.ConversationResponse;
 import com.example.app.dto.response.MessageResponse;
 import com.example.app.security.CustomUserDetails;
@@ -12,8 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/conversations")
@@ -50,5 +51,23 @@ public class ConversationController {
             @PathVariable UUID id,
             @RequestBody AddMessageRequest request) {
         return ResponseEntity.ok(conversationService.addMessage(id, currentUser.getId(), request));
+    }
+
+    @PutMapping("/{id}/vocabulary")
+    public ResponseEntity<ConversationResponse> updateVocabulary(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable UUID id,
+            @RequestBody UpdateVocabularyRequest request) {
+        return ResponseEntity.ok(conversationService.updateVocabulary(id, currentUser.getId(), request.getVocabularyJson()));
+    }
+
+    @PutMapping("/{id}/messages/{messageId}/feedback")
+    public ResponseEntity<MessageResponse> updateMessageFeedback(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable UUID id,
+            @PathVariable UUID messageId,
+            @RequestBody com.example.app.dto.request.UpdateMessageFeedbackRequest request) {
+        return ResponseEntity.ok(conversationService.updateMessageFeedback(
+                id, messageId, currentUser.getId(), request.getFeedback(), request.getSuggestedAnswer()));
     }
 }
