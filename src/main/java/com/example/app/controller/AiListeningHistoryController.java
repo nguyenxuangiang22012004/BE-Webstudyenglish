@@ -49,4 +49,12 @@ public class AiListeningHistoryController {
         Page<AiListeningHistoryResponse> response = aiListeningHistoryService.getHistory(currentUser.getUser(), pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách lịch sử thành công", response));
     }
+
+    @GetMapping("/history/{id}")
+    public ResponseEntity<ApiResponse<AiListeningHistoryResponse>> getHistoryById(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable java.util.UUID id) {
+        AiListeningHistoryResponse response = aiListeningHistoryService.getHistoryById(currentUser.getUser(), id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy chi tiết bài nghe thành công", response));
+    }
 }

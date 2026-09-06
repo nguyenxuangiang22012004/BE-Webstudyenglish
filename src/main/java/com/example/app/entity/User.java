@@ -44,6 +44,16 @@ public class User {
     @Column(name = "last_study_date")
     private LocalDate lastStudyDate;
 
+    // Custom study goals
+    @Column(nullable = false)
+    private Integer dailyWordsGoal = 10;
+
+    @Column(nullable = false)
+    private Integer totalWordsGoal = 200;
+
+    @Column(nullable = false)
+    private Integer streakGoal = 30;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private ZonedDateTime createdAt;
@@ -132,6 +142,30 @@ public class User {
 
     public void setLastStudyDate(LocalDate lastStudyDate) {
         this.lastStudyDate = lastStudyDate;
+    }
+
+    public Integer getDailyWordsGoal() {
+        return dailyWordsGoal;
+    }
+
+    public void setDailyWordsGoal(Integer dailyWordsGoal) {
+        this.dailyWordsGoal = dailyWordsGoal;
+    }
+
+    public Integer getTotalWordsGoal() {
+        return totalWordsGoal;
+    }
+
+    public void setTotalWordsGoal(Integer totalWordsGoal) {
+        this.totalWordsGoal = totalWordsGoal;
+    }
+
+    public Integer getStreakGoal() {
+        return streakGoal;
+    }
+
+    public void setStreakGoal(Integer streakGoal) {
+        this.streakGoal = streakGoal;
     }
 
     public ZonedDateTime getCreatedAt() {

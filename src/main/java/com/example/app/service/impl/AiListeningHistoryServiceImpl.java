@@ -69,6 +69,19 @@ public class AiListeningHistoryServiceImpl implements AiListeningHistoryService 
                 .map(this::mapToResponse);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public AiListeningHistoryResponse getHistoryById(User currentUser, java.util.UUID id) {
+        AiListeningHistory history = aiListeningHistoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch sử bài nghe"));
+
+        if (!history.getUser().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập lịch sử này");
+        }
+
+        return mapToResponse(history);
+    }
+
     private AiListeningHistoryResponse mapToResponse(AiListeningHistory history) {
         AiListeningHistoryResponse response = new AiListeningHistoryResponse();
         response.setId(history.getId());
