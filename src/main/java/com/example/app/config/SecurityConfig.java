@@ -68,6 +68,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/v1/auth/**").permitAll()
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers("/v1/admin/**").hasRole("ADMIN")
                     .requestMatchers("/v1/flashcards/**").authenticated()
                     .anyRequest().authenticated()
             )

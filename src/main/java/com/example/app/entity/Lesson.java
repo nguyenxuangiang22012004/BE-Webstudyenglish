@@ -65,6 +65,12 @@ public class Lesson {
         return topic != null ? topic.getId() : null;
     }
 
+    @com.fasterxml.jackson.annotation.JsonProperty("topicName")
+    @jakarta.persistence.Transient
+    public String getTopicNameValue() {
+        return topic != null ? topic.getName() : null;
+    }
+
     public void setTopic(Topic topic) {
         this.topic = topic;
     }

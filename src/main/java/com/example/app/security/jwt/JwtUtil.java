@@ -70,6 +70,8 @@ public class JwtUtil {
             claims.put("id", customUserDetails.getId());
             claims.put("email", customUserDetails.getUsername());
             claims.put("name", customUserDetails.getUser().getName());
+            // Thêm role vào JWT để FE middleware có thể kiểm tra quyền truy cập
+            claims.put("role", customUserDetails.getUser().getRole().name());
         }
 
         return Jwts.builder()
