@@ -15,4 +15,6 @@ public interface UserFlashcardProgressRepository extends JpaRepository<UserFlash
     Optional<UserFlashcardProgress> findByUserAndFlashcard(User user, Flashcard flashcard);
     List<UserFlashcardProgress> findByUser(User user);
     List<UserFlashcardProgress> findByUserAndStatus(User user, UserFlashcardProgress.FlashcardStatus status);
+    int countByUser(User user);
+    int countByUserAndStatus(User user, UserFlashcardProgress.FlashcardStatus status);
 }

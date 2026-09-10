@@ -15,4 +15,5 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
     List<StudyGroupMember> findByGroup(StudyGroup group);
     List<StudyGroupMember> findByUser(User user);
     Optional<StudyGroupMember> findByGroupAndUser(StudyGroup group, User user);
+    int countByUser(User user);
 }

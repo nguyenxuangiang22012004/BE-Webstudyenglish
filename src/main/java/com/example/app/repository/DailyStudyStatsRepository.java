@@ -14,4 +14,5 @@ import java.util.UUID;
 public interface DailyStudyStatsRepository extends JpaRepository<DailyStudyStats, UUID> {
     Optional<DailyStudyStats> findByUserAndStudyDate(User user, LocalDate studyDate);
     List<DailyStudyStats> findByUserOrderByStudyDateDesc(User user);
+    List<DailyStudyStats> findByUserAndStudyDateBetweenOrderByStudyDateAsc(User user, LocalDate from, LocalDate to);
 }
