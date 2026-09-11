@@ -1,5 +1,6 @@
 package com.example.app.controller;
 
+import com.example.app.dto.request.GoogleTokenRequest;
 import com.example.app.dto.request.LoginRequest;
 import com.example.app.dto.request.RefreshTokenRequest;
 import com.example.app.dto.request.RegisterRequest;
@@ -43,4 +44,12 @@ public class AuthController {
         ApiResponse<TokenResponse> response = new ApiResponse<>(true, "Token refreshed successfully", tokenResponse);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<TokenResponse>> loginWithGoogle(@Valid @RequestBody GoogleTokenRequest request) {
+        TokenResponse tokenResponse = authService.loginWithGoogle(request);
+        ApiResponse<TokenResponse> response = new ApiResponse<>(true, "Google login successful", tokenResponse);
+        return ResponseEntity.ok(response);
+    }
 }
+

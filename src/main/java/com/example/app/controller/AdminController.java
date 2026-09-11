@@ -41,13 +41,15 @@ public class AdminController {
      * Danh sách người dùng với tìm kiếm và phân trang
      */
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<Page<AdminUserDTO>>> getAllUsers(
+    public ResponseEntity<ApiResponse<com.example.app.dto.response.PageResponse<AdminUserDTO>>> getAllUsers(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) Integer limit) {
+        int pageSize = limit != null ? limit : (size != null ? size : 10);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
         Page<AdminUserDTO> users = adminService.getAllUsers(search, pageable);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Danh sách người dùng", users));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Danh sách người dùng", com.example.app.dto.response.PageResponse.of(users)));
     }
 
     /**

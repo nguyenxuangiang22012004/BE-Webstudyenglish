@@ -21,8 +21,14 @@ public class User {
     @Column(unique = true, nullable = false, length = 255)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = true, length = 255)
     private String passwordHash;
+
+    @Column(nullable = false, length = 50)
+    private String provider = "LOCAL"; // LOCAL, GOOGLE
+
+    @Column(length = 255)
+    private String providerId; // Google UID (sub)
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -69,6 +75,13 @@ public class User {
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
+    }
+
+    public User(String email, String name, String provider, String providerId) {
+        this.email = email;
+        this.name = name;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
     // Getters & Setters
@@ -118,6 +131,22 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
     public Integer getCurrentStreak() {

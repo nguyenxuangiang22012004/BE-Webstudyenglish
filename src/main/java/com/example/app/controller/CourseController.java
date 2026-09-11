@@ -59,14 +59,16 @@ public class CourseController {
     // ─── Courses (Read) ─────────────────────────────────────────────────────────
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<Course>>> getAllCourses(
+    public ResponseEntity<ApiResponse<com.example.app.dto.response.PageResponse<Course>>> getAllCourses(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) Integer limit,
             @RequestParam(required = false, defaultValue = "") String search) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        int pageSize = limit != null ? limit : (size != null ? size : 10);
+        Pageable pageable = PageRequest.of(page, pageSize);
         Page<Course> coursesPage = courseRepository.findByNameContainingIgnoreCase(search, pageable);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Courses retrieved successfully", coursesPage));
+        return ResponseEntity.ok(new ApiResponse<>(true, "Courses retrieved successfully", com.example.app.dto.response.PageResponse.of(coursesPage)));
     }
 
     @GetMapping("/{courseId}")
