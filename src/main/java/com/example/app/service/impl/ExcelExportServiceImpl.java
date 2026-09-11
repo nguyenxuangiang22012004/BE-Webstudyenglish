@@ -118,6 +118,54 @@ public class ExcelExportServiceImpl implements ExcelExportService {
         }
     }
 
+    @Override
+    public byte[] generateImportTemplate() throws IOException {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("Từ vựng");
+
+            // Column widths
+            sheet.setColumnWidth(0, 24 * 256);   // Từ vựng
+            sheet.setColumnWidth(1, 24 * 256);   // Nghĩa
+            sheet.setColumnWidth(2, 18 * 256);   // Phiên âm
+            sheet.setColumnWidth(3, 14 * 256);   // Loại từ
+            sheet.setColumnWidth(4, 45 * 256);   // Ví dụ
+
+            // ── HEADER ROW ──────────────────────────────────────────────────
+            XSSFCellStyle headerStyle = createHeaderStyle(workbook);
+            Row headerRow = sheet.createRow(0);
+            headerRow.setHeightInPoints(30);
+            String[] headers = {"Từ vựng", "Nghĩa", "Phiên âm", "Loại từ", "Ví dụ"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+
+
+            // ── 3 HÀNG DỮ LIỆU MẪU ─────────────────────────────────────────
+            XSSFCellStyle dataStyle = createTemplateDataStyle(workbook);
+            String[][] samples = {
+                    {"apple",     "táo",       "/ˈæp.əl/",       "noun",      "I eat an apple every day."},
+                    {"beautiful", "đẹp",       "/ˈbjuː.tɪ.fəl/", "adjective", "The scenery is beautiful."},
+                    {"run",       "chạy",      "/rʌn/",           "verb",      "She runs every morning."},
+            };
+            for (int i = 0; i < samples.length; i++) {
+                Row row = sheet.createRow(1 + i);
+                row.setHeightInPoints(22);
+                for (int c = 0; c < samples[i].length; c++) {
+                    Cell cell = row.createCell(c);
+                    cell.setCellValue(samples[i][c]);
+                    cell.setCellStyle(dataStyle);
+                }
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
+
     // ===== STYLE HELPERS =====
 
     private XSSFCellStyle createTitleStyle(XSSFWorkbook wb) {
@@ -209,5 +257,34 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 
     private String orEmpty(String value) {
         return value != null ? value : "";
+    }
+
+    private XSSFCellStyle createNoteStyle(XSSFWorkbook wb) {
+        XSSFCellStyle style = wb.createCellStyle();
+        XSSFFont font = wb.createFont();
+        font.setFontHeightInPoints((short) 9);
+        font.setItalic(true);
+        font.setColor(new XSSFColor(new byte[]{(byte) 120, (byte) 120, (byte) 140}, null));
+        style.setFont(font);
+        style.setFillForegroundColor(new XSSFColor(new byte[]{(byte) 245, (byte) 247, (byte) 255}, null));
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setIndention((short) 1);
+        return style;
+    }
+
+    private XSSFCellStyle createTemplateDataStyle(XSSFWorkbook wb) {
+        XSSFCellStyle style = wb.createCellStyle();
+        XSSFFont font = wb.createFont();
+        font.setFontHeightInPoints((short) 11);
+        font.setColor(new XSSFColor(new byte[]{(byte) 60, (byte) 60, (byte) 80}, null));
+        style.setFont(font);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBottomBorderColor(new XSSFColor(new byte[]{(byte) 200, (byte) 210, (byte) 230}, null));
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setLeftBorderColor(new XSSFColor(new byte[]{(byte) 200, (byte) 210, (byte) 230}, null));
+        style.setWrapText(false);
+        return style;
     }
 }

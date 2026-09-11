@@ -6,6 +6,7 @@ import com.example.app.dto.response.ApiResponse;
 import com.example.app.dto.response.FlashcardResponse;
 import com.example.app.dto.response.FlashcardSetResponse;
 import com.example.app.service.ExcelExportService;
+import com.example.app.service.ExcelImportService;
 import com.example.app.service.FlashcardService;
 import jakarta.validation.Valid;
 import org.springframework.http.ContentDisposition;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,12 +28,15 @@ public class FlashcardController {
 
     private final FlashcardService flashcardService;
     private final ExcelExportService excelExportService;
+    private final ExcelImportService excelImportService;
 
     public FlashcardController(
             FlashcardService flashcardService,
-            ExcelExportService excelExportService) {
+            ExcelExportService excelExportService,
+            ExcelImportService excelImportService) {
         this.flashcardService = flashcardService;
         this.excelExportService = excelExportService;
+        this.excelImportService = excelImportService;
     }
 
     // ============ FLASHCARD SETS ============
@@ -96,6 +101,46 @@ public class FlashcardController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(excelBytes);
+    }
+
+    // ============ EXCEL IMPORT ============
+
+    /**
+     * GET /v1/flashcards/import/template
+     * Download file Excel mẫu để người dùng điền vào.
+     * 5 cột: Từ vựng | Nghĩa | Phiên âm | Loại từ | Ví dụ
+     */
+    @GetMapping("/import/template")
+    public ResponseEntity<byte[]> downloadImportTemplate() throws IOException {
+        byte[] templateBytes = excelExportService.generateImportTemplate();
+
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename("template_tu_vung.xlsx", StandardCharsets.UTF_8)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDisposition(contentDisposition);
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.setContentLength(templateBytes.length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(templateBytes);
+    }
+
+    /**
+     * POST /v1/flashcards/import/excel/preview
+     * Parse file Excel upload, trả về danh sách từ để FE preview.
+     * Chưa lưu vào DB.
+     */
+    @PostMapping("/import/excel/preview")
+    public ResponseEntity<ApiResponse<List<CreateFlashcardRequest>>> previewExcelImport(
+            @RequestParam("file") MultipartFile file,
+            Authentication auth) throws IOException {
+        List<CreateFlashcardRequest> words = excelImportService.parseExcelFile(file);
+        return ResponseEntity.ok(new ApiResponse<>(true,
+                "Đọc được " + words.size() + " từ từ file Excel", words));
     }
 
     // ============ FLASHCARDS IN A SET ============
