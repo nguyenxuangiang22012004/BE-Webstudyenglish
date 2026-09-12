@@ -215,8 +215,21 @@ public class CourseController {
     // ─── Lessons (Read & Admin CRUD) ────────────────────────────────────────────
 
     @GetMapping("/lessons")
-    public ResponseEntity<ApiResponse<List<Lesson>>> getAllLessons() {
-        List<Lesson> lessons = lessonRepository.findAll();
+    public ResponseEntity<ApiResponse<List<Lesson>>> getAllLessons(
+            @RequestParam(required = false) UUID topicId,
+            @RequestParam(required = false) String type) {
+        List<Lesson> lessons;
+        boolean hasType = type != null && !type.isBlank() && !type.equalsIgnoreCase("ALL");
+
+        if (topicId != null && hasType) {
+            lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topicId, type.toUpperCase());
+        } else if (topicId != null) {
+            lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topicId);
+        } else if (hasType) {
+            lessons = lessonRepository.findByTypeOrderByOrderIndexAsc(type.toUpperCase());
+        } else {
+            lessons = lessonRepository.findAll();
+        }
         return ResponseEntity.ok(new ApiResponse<>(true, "All lessons retrieved successfully", lessons));
     }
 
@@ -228,8 +241,15 @@ public class CourseController {
     }
 
     @GetMapping("/topics/{topicId}/lessons")
-    public ResponseEntity<ApiResponse<List<Lesson>>> getLessonsByTopic(@PathVariable UUID topicId) {
-        List<Lesson> lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topicId);
+    public ResponseEntity<ApiResponse<List<Lesson>>> getLessonsByTopic(
+            @PathVariable UUID topicId,
+            @RequestParam(required = false) String type) {
+        List<Lesson> lessons;
+        if (type != null && !type.isBlank() && !type.equalsIgnoreCase("ALL")) {
+            lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topicId, type.toUpperCase());
+        } else {
+            lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topicId);
+        }
         return ResponseEntity.ok(new ApiResponse<>(true, "Lessons retrieved successfully", lessons));
     }
 
