@@ -38,6 +38,12 @@ public class AiLookupHistory {
     @Column(columnDefinition = "TEXT")
     private String example;
 
+    @Column(name = "full_data", columnDefinition = "TEXT")
+    private String fullData;
+
+    @Column(name = "source_url", length = 500)
+    private String sourceUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
