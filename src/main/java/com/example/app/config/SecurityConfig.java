@@ -86,9 +86,29 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "https://*.vercel.app",
+            "https://*.onrender.com",
+            "https://raven-cash-disloyal.ngrok-free.dev",
+            "https://*.ngrok-free.dev",
+            "https://*.ngrok-free.app",
+            "https://*.ngrok.io",
+            "https://*.loca.lt"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+        configuration.setAllowedHeaders(Arrays.asList(
+            "authorization",
+            "content-type",
+            "x-auth-token",
+            "ngrok-skip-browser-warning",
+            "Bypass-Tunnel-Reminder",
+            "bypass-tunnel-reminder",
+            "Origin",
+            "Accept",
+            "X-Requested-With"
+        ));
         configuration.setExposedHeaders(List.of("x-auth-token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
