@@ -15,6 +15,6 @@ services:
       - key: SPRING_DATASOURCE_PASSWORD
         value: npg_svzjQOo1Mi8I
       - key: GOOGLE_CLIENT_ID
-        value: 537126281362-c176dp1e8pss19m34u3tbm83asg0dht5.apps.googleusercontent.com
+        sync: false
       - key: AES_SECRET_KEY
         sync: false
