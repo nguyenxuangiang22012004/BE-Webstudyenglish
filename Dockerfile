@@ -5,6 +5,8 @@ COPY pom.xml .
 # Cache dependencies
 RUN mvn dependency:go-offline -B
 COPY src ./src
+# Tự động tạo application.properties từ template nếu chưa có
+RUN if [ ! -f src/main/resources/application.properties ]; then cp src/main/resources/application.properties.example src/main/resources/application.properties; fi
 # Build package skipping tests
 RUN mvn clean package -DskipTests
 
