@@ -27,8 +27,7 @@ replay_pid*
 .classpath
 .agent/
 
-# Sensitive Configuration Files
-src/main/resources/application.properties
-src/main/resources/application-*.properties
-src/main/resources/application.yml
-src/main/resources/application-*.yml
+# Sensitive Local Overrides
+src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+*.local.properties
