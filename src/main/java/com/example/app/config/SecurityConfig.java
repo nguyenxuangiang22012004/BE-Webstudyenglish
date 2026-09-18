@@ -67,6 +67,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/v1/auth/**").permitAll()
+                    .requestMatchers("/v1/ai-config/trial/**").permitAll()
                     .requestMatchers("/error").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, 
                         "/v1/courses", 
