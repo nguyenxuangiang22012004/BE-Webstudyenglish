@@ -68,6 +68,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/v1/auth/**").permitAll()
                     .requestMatchers("/error").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, 
+                        "/v1/courses", 
+                        "/v1/courses/*", 
+                        "/v1/courses/*/topics", 
+                        "/v1/courses/topics", 
+                        "/v1/courses/topics/*", 
+                        "/v1/courses/lessons", 
+                        "/v1/courses/lessons/*", 
+                        "/v1/courses/topics/*/lessons"
+                    ).permitAll()
                     .requestMatchers("/v1/admin/**").hasRole("ADMIN")
                     .requestMatchers("/v1/flashcards/**").authenticated()
                     .anyRequest().authenticated()
