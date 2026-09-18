@@ -2,6 +2,9 @@
 server.port=${PORT:8080}
 server.servlet.context-path=${CONTEXT_PATH:/api}
 
+# Tự động nạp file application-local.properties nếu có (khi chạy ở local)
+spring.config.import=optional:classpath:application-local.properties
+
 # PostgreSQL Database Configuration
 spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/your_db_name}
 spring.datasource.username=${SPRING_DATASOURCE_USERNAME:your_db_username}
