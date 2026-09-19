@@ -25,6 +25,9 @@ public class Course {
     @Column(length = 50)
     private String level;
 
+    @Column(length = 100, unique = true)
+    private String slug;
+
     @Column(length = 500)
     private String imageUrl;
 
@@ -68,6 +71,14 @@ public class Course {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public String getImageUrl() {

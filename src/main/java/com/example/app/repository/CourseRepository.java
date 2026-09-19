@@ -6,9 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
     Page<Course> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Optional<Course> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 }

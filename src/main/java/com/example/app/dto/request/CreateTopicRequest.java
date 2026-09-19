@@ -9,6 +9,9 @@ public class CreateTopicRequest {
     @Size(max = 255, message = "Tên chủ đề không được quá 255 ký tự")
     private String name;
 
+    @Size(max = 100, message = "Slug không được quá 100 ký tự")
+    private String slug;
+
     private String description;
 
     private Integer orderIndex = 0;
@@ -17,6 +20,14 @@ public class CreateTopicRequest {
     private String mascotImageUrl;
 
     private String introMessage;
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
 
     public String getName() {
         return name;
