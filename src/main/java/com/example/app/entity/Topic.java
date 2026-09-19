@@ -24,6 +24,9 @@ public class Topic {
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Column(length = 100, unique = true)
+    private String slug;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -81,6 +84,14 @@ public class Topic {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public String getDescription() {

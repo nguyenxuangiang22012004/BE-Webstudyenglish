@@ -10,6 +10,7 @@ import java.util.UUID;
 public class CourseDetailResponse {
 
     private UUID id;
+    private String slug;
     private String name;
     private String description;
     private String level;
@@ -20,6 +21,7 @@ public class CourseDetailResponse {
 
     public CourseDetailResponse(Course course, List<Topic> topics) {
         this.id = course.getId();
+        this.slug = course.getSlug();
         this.name = course.getName();
         this.description = course.getDescription();
         this.level = course.getLevel();
@@ -35,6 +37,14 @@ public class CourseDetailResponse {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 
     public String getName() {

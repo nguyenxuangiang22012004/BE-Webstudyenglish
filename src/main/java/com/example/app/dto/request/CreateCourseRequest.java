@@ -11,11 +11,22 @@ public class CreateCourseRequest {
 
     private String description;
 
+    @Size(max = 100, message = "Slug không được quá 100 ký tự")
+    private String slug;
+
     @Size(max = 50, message = "Cấp độ không được quá 50 ký tự")
     private String level;
 
     @Size(max = 500, message = "Đường dẫn ảnh không được quá 500 ký tự")
     private String imageUrl;
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
 
     public String getName() {
         return name;

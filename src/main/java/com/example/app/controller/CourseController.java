@@ -56,6 +56,26 @@ public class CourseController {
     @Autowired
     private CourseProgressService courseProgressService;
 
+    private Course resolveCourse(String identifier) {
+        if (identifier == null || identifier.isBlank()) return null;
+        try {
+            UUID id = UUID.fromString(identifier);
+            return courseRepository.findById(id).orElseGet(() -> courseRepository.findBySlug(identifier).orElse(null));
+        } catch (IllegalArgumentException e) {
+            return courseRepository.findBySlug(identifier).orElse(null);
+        }
+    }
+
+    private Topic resolveTopic(String identifier) {
+        if (identifier == null || identifier.isBlank()) return null;
+        try {
+            UUID id = UUID.fromString(identifier);
+            return topicRepository.findById(id).orElseGet(() -> topicRepository.findBySlug(identifier).orElse(null));
+        } catch (IllegalArgumentException e) {
+            return topicRepository.findBySlug(identifier).orElse(null);
+        }
+    }
+
     // ─── Courses (Read) ─────────────────────────────────────────────────────────
 
     @GetMapping
@@ -72,22 +92,29 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}")
-    public ResponseEntity<ApiResponse<CourseDetailResponse>> getCourseDetail(@PathVariable UUID courseId) {
-        Course course = courseRepository.findById(courseId).orElse(null);
+    public ResponseEntity<ApiResponse<CourseDetailResponse>> getCourseDetail(@PathVariable String courseId) {
+        Course course = resolveCourse(courseId);
         if (course == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>(false, "Course not found", null));
         }
-        List<Topic> topics = topicRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        List<Topic> topics = topicRepository.findByCourseIdOrderByOrderIndexAsc(course.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Course detail retrieved successfully", new CourseDetailResponse(course, topics)));
     }
 
-    // ─── Courses (Admin CRUD) ───────────────────────────────────────────────────
+    private String sanitizeSlug(String slug) {
+        if (slug == null || slug.isBlank()) return null;
+        return slug.trim().toLowerCase()
+                .replaceAll("[^a-z0-9\\-]", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Course>> createCourse(@Valid @RequestBody CreateCourseRequest request) {
         Course course = new Course();
         course.setName(request.getName());
+        course.setSlug(sanitizeSlug(request.getSlug()));
         course.setDescription(request.getDescription());
         course.setLevel(request.getLevel());
         course.setImageUrl(request.getImageUrl());
@@ -103,6 +130,9 @@ public class CourseController {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found: " + courseId));
         course.setName(request.getName());
+        if (request.getSlug() != null) {
+            course.setSlug(sanitizeSlug(request.getSlug()));
+        }
         course.setDescription(request.getDescription());
         course.setLevel(request.getLevel());
         course.setImageUrl(request.getImageUrl());
@@ -135,29 +165,38 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/topics")
-    public ResponseEntity<ApiResponse<List<Topic>>> getTopicsByCourse(@PathVariable UUID courseId) {
-        List<Topic> topics = topicRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+    public ResponseEntity<ApiResponse<List<Topic>>> getTopicsByCourse(@PathVariable String courseId) {
+        Course course = resolveCourse(courseId);
+        if (course == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Course not found", null));
+        }
+        List<Topic> topics = topicRepository.findByCourseIdOrderByOrderIndexAsc(course.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Topics retrieved successfully", topics));
     }
 
     @GetMapping("/topics/{topicId}")
-    public ResponseEntity<ApiResponse<Topic>> getTopicById(@PathVariable UUID topicId) {
-        Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new RuntimeException("Topic not found: " + topicId));
+    public ResponseEntity<ApiResponse<Topic>> getTopicById(@PathVariable String topicId) {
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
         return ResponseEntity.ok(new ApiResponse<>(true, "Topic retrieved successfully", topic));
     }
 
     @PostMapping("/{courseId}/topics")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Topic>> createTopic(
-            @PathVariable UUID courseId,
+            @PathVariable String courseId,
             @Valid @RequestBody CreateTopicRequest request) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found: " + courseId));
+        Course course = resolveCourse(courseId);
+        if (course == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Course not found", null));
+        }
 
         Topic topic = new Topic();
         topic.setCourse(course);
         topic.setName(request.getName());
+        topic.setSlug(sanitizeSlug(request.getSlug()));
         topic.setDescription(request.getDescription());
         topic.setOrderIndex(request.getOrderIndex() != null ? request.getOrderIndex() : 0);
         topic.setMascotImageUrl(request.getMascotImageUrl());
@@ -170,12 +209,17 @@ public class CourseController {
     @PutMapping("/topics/{topicId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Topic>> updateTopic(
-            @PathVariable UUID topicId,
+            @PathVariable String topicId,
             @Valid @RequestBody CreateTopicRequest request) {
-        Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new RuntimeException("Topic not found: " + topicId));
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
 
         topic.setName(request.getName());
+        if (request.getSlug() != null) {
+            topic.setSlug(sanitizeSlug(request.getSlug()));
+        }
         topic.setDescription(request.getDescription());
         if (request.getOrderIndex() != null) {
             topic.setOrderIndex(request.getOrderIndex());
@@ -190,8 +234,12 @@ public class CourseController {
     @DeleteMapping("/topics/{topicId}")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> deleteTopic(@PathVariable UUID topicId) {
-        deleteTopicInternal(topicId);
+    public ResponseEntity<ApiResponse<Void>> deleteTopic(@PathVariable String topicId) {
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
+        deleteTopicInternal(topic.getId());
         return ResponseEntity.ok(new ApiResponse<>(true, "Đã xóa chủ đề thành công", null));
     }
 
@@ -216,15 +264,21 @@ public class CourseController {
 
     @GetMapping("/lessons")
     public ResponseEntity<ApiResponse<List<Lesson>>> getAllLessons(
-            @RequestParam(required = false) UUID topicId,
+            @RequestParam(required = false) String topicId,
             @RequestParam(required = false) String type) {
         List<Lesson> lessons;
         boolean hasType = type != null && !type.isBlank() && !type.equalsIgnoreCase("ALL");
 
-        if (topicId != null && hasType) {
-            lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topicId, type.toUpperCase());
-        } else if (topicId != null) {
-            lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topicId);
+        if (topicId != null && !topicId.isBlank()) {
+            Topic topic = resolveTopic(topicId);
+            if (topic == null) {
+                return ResponseEntity.ok(new ApiResponse<>(true, "All lessons retrieved successfully", List.of()));
+            }
+            if (hasType) {
+                lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topic.getId(), type.toUpperCase());
+            } else {
+                lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topic.getId());
+            }
         } else if (hasType) {
             lessons = lessonRepository.findByTypeOrderByOrderIndexAsc(type.toUpperCase());
         } else {
@@ -242,13 +296,17 @@ public class CourseController {
 
     @GetMapping("/topics/{topicId}/lessons")
     public ResponseEntity<ApiResponse<List<Lesson>>> getLessonsByTopic(
-            @PathVariable UUID topicId,
+            @PathVariable String topicId,
             @RequestParam(required = false) String type) {
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", List.of()));
+        }
         List<Lesson> lessons;
         if (type != null && !type.isBlank() && !type.equalsIgnoreCase("ALL")) {
-            lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topicId, type.toUpperCase());
+            lessons = lessonRepository.findByTopicIdAndTypeOrderByOrderIndexAsc(topic.getId(), type.toUpperCase());
         } else {
-            lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topicId);
+            lessons = lessonRepository.findByTopicIdOrderByOrderIndexAsc(topic.getId());
         }
         return ResponseEntity.ok(new ApiResponse<>(true, "Lessons retrieved successfully", lessons));
     }
@@ -327,9 +385,13 @@ public class CourseController {
      */
     @GetMapping("/{courseId}/my-progress")
     public ResponseEntity<ApiResponse<CourseProgressResponse>> getCourseProgress(
-            @PathVariable UUID courseId,
+            @PathVariable String courseId,
             Authentication auth) {
-        CourseProgressResponse response = courseProgressService.getCourseProgress(courseId, auth.getName());
+        Course course = resolveCourse(courseId);
+        if (course == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Course not found", null));
+        }
+        CourseProgressResponse response = courseProgressService.getCourseProgress(course.getId(), auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Course progress retrieved successfully", response));
     }
 
@@ -351,10 +413,14 @@ public class CourseController {
      */
     @PutMapping("/topics/{topicId}/progress")
     public ResponseEntity<ApiResponse<TopicProgressResponse>> updateTopicProgress(
-            @PathVariable UUID topicId,
+            @PathVariable String topicId,
             @RequestBody UpdateTopicProgressRequest request,
             Authentication auth) {
-        TopicProgressResponse response = courseProgressService.updateTopicProgress(topicId, request, auth.getName());
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
+        TopicProgressResponse response = courseProgressService.updateTopicProgress(topic.getId(), request, auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Topic progress updated successfully", response));
     }
 
@@ -365,9 +431,13 @@ public class CourseController {
      */
     @GetMapping("/topics/{topicId}/final-score")
     public ResponseEntity<ApiResponse<TopicFinalScoreResponse>> getTopicFinalScore(
-            @PathVariable UUID topicId,
+            @PathVariable String topicId,
             Authentication auth) {
-        TopicFinalScoreResponse response = courseProgressService.calculateFinalScore(topicId, auth.getName());
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
+        TopicFinalScoreResponse response = courseProgressService.calculateFinalScore(topic.getId(), auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Final score calculated successfully", response));
     }
 
@@ -376,9 +446,13 @@ public class CourseController {
      */
     @DeleteMapping("/topics/{topicId}/progress")
     public ResponseEntity<ApiResponse<TopicProgressResponse>> resetTopicProgress(
-            @PathVariable UUID topicId,
+            @PathVariable String topicId,
             Authentication auth) {
-        TopicProgressResponse response = courseProgressService.resetTopicProgress(topicId, auth.getName());
+        Topic topic = resolveTopic(topicId);
+        if (topic == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(false, "Topic not found", null));
+        }
+        TopicProgressResponse response = courseProgressService.resetTopicProgress(topic.getId(), auth.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Topic progress reset successfully", response));
     }
 }
